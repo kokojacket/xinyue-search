@@ -9,6 +9,99 @@
 
 ## 部署步骤
 
+### 方式一：使用预构建镜像（推荐）
+
+1. 创建项目目录并准备必要文件
+
+```bash
+mkdir -p xinyue-search/storage/logs
+cd xinyue-search
+```
+
+2. 下载数据库初始化SQL文件
+
+将项目仓库中的`data.sql`文件下载到当前目录。
+
+3. 创建docker-compose.yml文件
+
+```yaml
+version: '3'
+
+services:
+  app:
+    image: ghcr.io/用户名/xinyue-search:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./storage/logs:/var/www/html/storage/logs
+    environment:
+      APP_DEBUG: 'false'
+      SYSTEM_SALT: 'YAdmin'
+      APP_DEFAULT_TIMEZONE: 'Asia/Chongqing'
+      DATABASE_TYPE: 'mysql'
+      DATABASE_HOSTNAME: 'mysql'
+      DATABASE_DATABASE: 'www_dj_com'
+      DATABASE_USERNAME: 'root'
+      DATABASE_PASSWORD: 'root'
+      DATABASE_HOSTPORT: '3306'
+      DATABASE_CHARSET: 'utf8mb4'
+      DATABASE_DEBUG: 'false'
+      DATABASE_PREFIX: 'qf_'
+      LANG_DEFAULT_LANG: 'zh-cn'
+    depends_on:
+      - mysql
+    networks:
+      - xinyue-network
+    restart: always
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: www_dj_com
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./data.sql:/docker-entrypoint-initdb.d/data.sql
+    networks:
+      - xinyue-network
+    restart: always
+
+networks:
+  xinyue-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+```
+
+> 注意：请将`ghcr.io/用户名/xinyue-search:latest`中的"用户名"替换为实际的GitHub用户名。
+
+4. 登录到GitHub Container Registry
+
+```bash
+# 使用GitHub个人访问令牌登录
+echo $GITHUB_TOKEN | docker login ghcr.io -u 你的GitHub用户名 --password-stdin
+```
+
+> 如果是公开仓库的镜像，可以跳过此步骤。
+
+5. 启动服务
+
+```bash
+docker-compose up -d
+```
+
+6. 访问网站
+
+- 前台: http://服务器IP
+- 后台: http://服务器IP/qfadmin (账号: admin, 密码: 123456)
+
+### 方式二：从源码构建（开发环境）
+
 1. 克隆代码到服务器
 
 ```bash
@@ -16,7 +109,17 @@ git clone <项目Git地址> xinyue-search
 cd xinyue-search
 ```
 
-2. 配置环境变量
+2. 修改docker-compose.yml文件
+
+将docker-compose.yml中的`image: ghcr.io/用户名/xinyue-search:latest`改为：
+
+```yaml
+build:
+  context: .
+  dockerfile: Dockerfile
+```
+
+3. 配置环境变量
 
 根据需要修改项目根目录下的`.env`文件，特别是数据库连接信息：
 
@@ -30,17 +133,13 @@ PASSWORD = root  # 与docker-compose.yml中的MYSQL_ROOT_PASSWORD一致
 HOSTPORT = 3306
 ```
 
-3. 启动Docker容器
+4. 启动Docker容器
 
 ```bash
 docker-compose up -d
 ```
 
 首次启动会构建Docker镜像，这可能需要几分钟时间。
-
-4. 初始化数据库
-
-数据库会在容器启动时自动初始化(使用项目根目录中的data.sql文件)。
 
 5. 访问网站
 
