@@ -3,6 +3,7 @@ version: '3'
 services:
   app:
     image: ghcr.io/kokojacket/xinyue-search:latest
+    container_name: xinyue-app
     # 如果需要本地构建
     # build:
     #   context: .
@@ -16,7 +17,6 @@ services:
       - /opt/docker/xinyue/app/runtime:/var/www/html/runtime
       - /opt/docker/xinyue/app/public/uploads:/var/www/html/public/uploads
     depends_on:
-      - mysql
       mysql:
         condition: service_healthy
     networks:
@@ -25,6 +25,7 @@ services:
 
   mysql:
     image: mysql:5.7
+    container_name: xinyue-mysql
     ports:
       - "3306:3306"
     environment:

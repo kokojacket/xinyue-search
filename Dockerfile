@@ -47,27 +47,25 @@ RUN mkdir -p /var/www/html/runtime \
     && chmod -R 777 /var/www/html/public/uploads
 
 # 创建默认.env文件(将在entrypoint.sh中处理)
-RUN cat > /var/www/html/.env.default << EOF
-APP_DEBUG = false
-SYSTEM_SALT= YAdmin
-
-[APP]
-DEFAULT_TIMEZONE = Asia/Chongqing
-
-[DATABASE]
-TYPE = mysql
-HOSTNAME = mysql
-DATABASE = www_dj_com
-USERNAME = root
-PASSWORD = root
-HOSTPORT = 3306
-CHARSET = utf8mb4
-DEBUG = false
-PREFIX = qf_
-
-[LANG]
-default_lang = zh-cn
-EOF
+RUN echo 'APP_DEBUG = false' > /var/www/html/.env.default \
+    && echo 'SYSTEM_SALT= YAdmin' >> /var/www/html/.env.default \
+    && echo '' >> /var/www/html/.env.default \
+    && echo '[APP]' >> /var/www/html/.env.default \
+    && echo 'DEFAULT_TIMEZONE = Asia/Chongqing' >> /var/www/html/.env.default \
+    && echo '' >> /var/www/html/.env.default \
+    && echo '[DATABASE]' >> /var/www/html/.env.default \
+    && echo 'TYPE = mysql' >> /var/www/html/.env.default \
+    && echo 'HOSTNAME = mysql' >> /var/www/html/.env.default \
+    && echo 'DATABASE = www_dj_com' >> /var/www/html/.env.default \
+    && echo 'USERNAME = root' >> /var/www/html/.env.default \
+    && echo 'PASSWORD = root' >> /var/www/html/.env.default \
+    && echo 'HOSTPORT = 3306' >> /var/www/html/.env.default \
+    && echo 'CHARSET = utf8mb4' >> /var/www/html/.env.default \
+    && echo 'DEBUG = false' >> /var/www/html/.env.default \
+    && echo 'PREFIX = qf_' >> /var/www/html/.env.default \
+    && echo '' >> /var/www/html/.env.default \
+    && echo '[LANG]' >> /var/www/html/.env.default \
+    && echo 'default_lang = zh-cn' >> /var/www/html/.env.default
 
 # 复制启动脚本
 COPY entrypoint.sh /usr/local/bin/
